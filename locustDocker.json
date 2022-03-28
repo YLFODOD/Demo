@@ -1,0 +1,74 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "containerGroups_ci001_name": {
+            "defaultValue": "ci001",
+            "type": "String"
+        }
+    },
+    "variables": {
+        "dnsNamelabel" : "[uniqueString(resourceGroup().id, deployment().name)]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2021-10-01",
+            "name": "[parameters('containerGroups_ci001_name')]",
+            "location": "southeastasia",
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('containerGroups_ci001_name')]",
+                        "properties": {
+                            "image": "democrforme.azurecr.io/demo/demo-locust-image:latest",
+                            "ports": [
+                                {
+                                    "protocol": "TCP",
+                                    "port": 80
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 8089
+                                }
+                            ],
+                            "environmentVariables": [],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1.5,
+                                    "cpu": 1
+                                }
+                            },
+                            "command" : ["locust", "--master"]
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "imageRegistryCredentials": [
+                    {
+                        "server": "democrforme.azurecr.io",
+                        "username": "democrforme",
+                        "password": "vs861gu5kDEnxtU3UoRagp=BUHkV7p8e"
+                    }
+                ],
+                "restartPolicy": "OnFailure",
+                "ipAddress": {
+                    "ports": [
+                        {
+                            "protocol": "TCP",
+                            "port": 80
+                        },
+                        {
+                            "protocol": "TCP",
+                            "port": 8089
+                        }
+                    ],
+                    "type": "Public",
+                    "dnsNameLabel": "[variables('dnsNamelabel')]"
+                },
+                "osType": "Linux"
+            }
+        }
+    ]
+}
